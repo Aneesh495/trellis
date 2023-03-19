@@ -1,0 +1,34 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@trellis/core": ["packages/core/src/index.ts"],
+      "@trellis/parser": ["packages/parser/src/index.ts"],
+      "@trellis/runtime": ["packages/runtime/src/index.ts"],
+      "@trellis/functions": ["packages/functions/src/index.ts"],
+      "@trellis/graph": ["packages/graph/src/index.ts"],
+      "@trellis/spill": ["packages/spill/src/index.ts"],
+      "@trellis/columnar": ["packages/columnar/src/index.ts"],
+      "@trellis/relational": ["packages/relational/src/index.ts"],
+      "@trellis/storage": ["packages/storage/src/index.ts"],
+      "@trellis/crdt": ["packages/crdt/src/index.ts"],
+      "@trellis/server": ["packages/server/src/index.ts"],
+      "@trellis/client": ["packages/client/src/index.ts"],
+      "@trellis/cli": ["packages/cli/src/index.ts"],
+      "@trellis/engine": ["packages/engine/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "tests/**/*.ts",
+    "scripts/**/*.ts",
+    "web/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "c",
+    "python"
+  ]
+}

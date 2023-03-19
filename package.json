@@ -1,0 +1,36 @@
+{
+  "name": "trellis-monorepo",
+  "version": "1.0.0",
+  "description": "High-throughput reactive calculation engine, vectorized columnar memory fabric, and collaborative tabular calculation kernel in TypeScript",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx tests/runner.ts",
+    "test:unit": "tsx tests/runner.ts --unit",
+    "test:integration": "tsx tests/runner.ts --integration",
+    "test:fuzz": "tsx tests/runner.ts --fuzz",
+    "bench": "tsx scripts/run-benchmarks.ts",
+    "audit:emdash": "tsx scripts/audit-em-dash.ts",
+    "cli": "tsx packages/cli/src/index.ts",
+    "serve": "tsx packages/server/src/index.ts",
+    "verify": "npm run audit:emdash && npm run typecheck && npm run test"
+  },
+  "keywords": [
+    "reactive-programming",
+    "compiler",
+    "dag",
+    "formula-engine",
+    "crdt",
+    "columnar-storage",
+    "spreadsheet-engine"
+  ],
+  "author": "Aneesh Krishna Parthasarathy <aneeshkrishnaparthasarathy@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
