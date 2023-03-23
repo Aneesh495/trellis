@@ -1,0 +1,13 @@
+{
+  "name": "@trellis/core",
+  "version": "1.0.0",
+  "description": "Core data types, coordinate geometry, address parsers, and coercion rules for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT"
+}

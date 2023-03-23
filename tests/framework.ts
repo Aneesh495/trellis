@@ -98,12 +98,10 @@ export function assertCloseTo(actual: number, expected: number, epsilon = 1e-7, 
 
 export function assertThrows(fn: () => unknown, expectedErrorSubstr?: string): void {
   let threw = false;
-  let thrownError: unknown;
   try {
     fn();
   } catch (err) {
     threw = true;
-    thrownError = err;
     if (expectedErrorSubstr && err instanceof Error) {
       if (!err.message.includes(expectedErrorSubstr)) {
         throw new AssertionError(
