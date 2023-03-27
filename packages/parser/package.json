@@ -1,0 +1,16 @@
+{
+  "name": "@trellis/parser",
+  "version": "1.0.0",
+  "description": "Lexer, Pratt parser, AST definitions, linter, and decompiler for Trellis formulas",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*"
+  },
+  "license": "MIT"
+}

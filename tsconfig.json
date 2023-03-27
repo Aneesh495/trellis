@@ -20,9 +20,11 @@
   },
   "include": [
     "packages/core/src/**/*.ts",
+    "packages/parser/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
+    "tests/parser.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [
