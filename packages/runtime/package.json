@@ -1,0 +1,17 @@
+{
+  "name": "@trellis/runtime",
+  "version": "1.0.0",
+  "description": "Stack-based Virtual Machine, bytecode compiler, and execution context for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*",
+    "@trellis/parser": "workspace:*"
+  },
+  "license": "MIT"
+}
