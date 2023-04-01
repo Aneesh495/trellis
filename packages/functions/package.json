@@ -1,0 +1,17 @@
+{
+  "name": "@trellis/functions",
+  "version": "1.0.0",
+  "description": "Standard library of 160+ mathematical, statistical, financial, text, datetime, lookup, and array functions for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*",
+    "@trellis/runtime": "workspace:*"
+  },
+  "license": "MIT"
+}
