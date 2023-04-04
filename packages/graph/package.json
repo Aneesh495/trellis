@@ -1,0 +1,17 @@
+{
+  "name": "@trellis/graph",
+  "version": "1.0.0",
+  "description": "Reactive dependency Directed Acyclic Graph, Tarjan SCC cycle detection, spatial range indexing, and incremental wave propagator for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*",
+    "@trellis/parser": "workspace:*"
+  },
+  "license": "MIT"
+}

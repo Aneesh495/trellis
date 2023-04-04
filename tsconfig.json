@@ -23,12 +23,14 @@
     "packages/parser/src/**/*.ts",
     "packages/runtime/src/**/*.ts",
     "packages/functions/src/**/*.ts",
+    "packages/graph/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
     "tests/parser.test.ts",
     "tests/runtime.test.ts",
     "tests/functions.test.ts",
+    "tests/graph.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [
