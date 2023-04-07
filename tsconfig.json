@@ -24,6 +24,7 @@
     "packages/runtime/src/**/*.ts",
     "packages/functions/src/**/*.ts",
     "packages/graph/src/**/*.ts",
+    "packages/spill/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
@@ -31,6 +32,7 @@
     "tests/runtime.test.ts",
     "tests/functions.test.ts",
     "tests/graph.test.ts",
+    "tests/spill.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [

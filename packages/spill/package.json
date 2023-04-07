@@ -1,0 +1,16 @@
+{
+  "name": "@trellis/spill",
+  "version": "1.0.0",
+  "description": "Dynamic array spill allocation, boundary collision detection, and spill range reference resolution for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*"
+  },
+  "license": "MIT"
+}
