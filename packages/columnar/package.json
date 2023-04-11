@@ -1,0 +1,16 @@
+{
+  "name": "@trellis/columnar",
+  "version": "1.0.0",
+  "description": "Vectorized columnar chunked memory fabric, bit-packed null masks, dictionary/RLE codecs, and zone map aggregators for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*"
+  },
+  "license": "MIT"
+}
