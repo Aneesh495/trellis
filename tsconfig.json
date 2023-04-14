@@ -26,6 +26,7 @@
     "packages/graph/src/**/*.ts",
     "packages/spill/src/**/*.ts",
     "packages/columnar/src/**/*.ts",
+    "packages/relational/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
@@ -35,6 +36,7 @@
     "tests/graph.test.ts",
     "tests/spill.test.ts",
     "tests/columnar.test.ts",
+    "tests/relational.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [
