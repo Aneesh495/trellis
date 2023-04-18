@@ -1,0 +1,17 @@
+{
+  "name": "@trellis/storage",
+  "version": "1.0.0",
+  "description": "Workbook domain model, style registry, custom binary .trellis codec with CRC32, JSON, and CSV serializers for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*",
+    "@trellis/parser": "workspace:*"
+  },
+  "license": "MIT"
+}
