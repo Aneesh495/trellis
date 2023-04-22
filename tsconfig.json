@@ -28,6 +28,7 @@
     "packages/columnar/src/**/*.ts",
     "packages/relational/src/**/*.ts",
     "packages/storage/src/**/*.ts",
+    "packages/crdt/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
@@ -39,6 +40,7 @@
     "tests/columnar.test.ts",
     "tests/relational.test.ts",
     "tests/storage.test.ts",
+    "tests/crdt.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [

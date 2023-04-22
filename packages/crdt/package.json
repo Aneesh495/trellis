@@ -1,0 +1,16 @@
+{
+  "name": "@trellis/crdt",
+  "version": "1.0.0",
+  "description": "Local-first Hybrid Logical Clocks, Last-Write-Wins cell registers, fractional indexing RGA, and selective undo for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*"
+  },
+  "license": "MIT"
+}
