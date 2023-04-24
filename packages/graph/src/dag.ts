@@ -77,6 +77,25 @@ export class DependencyDAG {
   }
 
   /**
+   * Clears incoming precedents and range dependencies for a cell while preserving its dependents.
+   */
+  public clearPrecedents(cell: CellCoord): void {
+    const key = cellKey(cell);
+    const node = this.nodes.get(key);
+    if (!node) return;
+
+    for (const precKey of node.precedents) {
+      const precNode = this.nodes.get(precKey);
+      if (precNode) {
+        precNode.removeDependent(node.key);
+      }
+    }
+    this.spatialIndex.remove(node.key);
+    node.clearPrecedents();
+    this.volatileKeys.delete(node.key);
+  }
+
+  /**
    * Removes a cell from the DAG and purges associated graph edges.
    */
   public removeCell(cell: CellCoord): void {

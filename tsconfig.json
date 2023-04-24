@@ -29,6 +29,7 @@
     "packages/relational/src/**/*.ts",
     "packages/storage/src/**/*.ts",
     "packages/crdt/src/**/*.ts",
+    "packages/engine/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
@@ -41,6 +42,7 @@
     "tests/relational.test.ts",
     "tests/storage.test.ts",
     "tests/crdt.test.ts",
+    "tests/engine.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [

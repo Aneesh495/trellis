@@ -131,9 +131,32 @@ export class SpillManager {
     return alloc && alloc.status === "active" ? alloc.range : undefined;
   }
 
+  public getSpillMatrix(root: CellCoord): TMatrix | undefined {
+    const rootKey = formatCellRef(root).toUpperCase();
+    const alloc = this.allocations.get(rootKey);
+    return alloc && alloc.status === "active" ? alloc.matrix : undefined;
+  }
+
   public isSpillChild(coord: CellCoord): boolean {
     const key = formatCellRef(coord).toUpperCase();
     return this.childToRoot.has(key);
+  }
+
+  public isGhostCell(coord: CellCoord): boolean {
+    return this.isSpillChild(coord);
+  }
+
+  public getBlockedSpillRootsAt(coord: CellCoord): CellCoord[] {
+    const key = formatCellRef(coord).toUpperCase();
+    const roots: CellCoord[] = [];
+    for (const alloc of this.allocations.values()) {
+      if (alloc.status === "blocked" && alloc.blockedCoord) {
+        if (formatCellRef(alloc.blockedCoord).toUpperCase() === key) {
+          roots.push(alloc.root);
+        }
+      }
+    }
+    return roots;
   }
 
   public getSpillRootForCell(coord: CellCoord): CellCoord | undefined {

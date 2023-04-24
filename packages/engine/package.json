@@ -1,0 +1,24 @@
+{
+  "name": "@trellis/engine",
+  "version": "1.0.0",
+  "description": "Unified reactive calculation engine orchestrating DAG, VM, dynamic array spill, and storage for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*",
+    "@trellis/parser": "workspace:*",
+    "@trellis/runtime": "workspace:*",
+    "@trellis/functions": "workspace:*",
+    "@trellis/graph": "workspace:*",
+    "@trellis/spill": "workspace:*",
+    "@trellis/columnar": "workspace:*",
+    "@trellis/relational": "workspace:*",
+    "@trellis/storage": "workspace:*"
+  },
+  "license": "MIT"
+}
