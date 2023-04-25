@@ -1,0 +1,26 @@
+{
+  "name": "@trellis/server",
+  "version": "1.0.0",
+  "description": "Zero-dependency real-time collaboration server and HTTP daemon for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*",
+    "@trellis/parser": "workspace:*",
+    "@trellis/runtime": "workspace:*",
+    "@trellis/functions": "workspace:*",
+    "@trellis/graph": "workspace:*",
+    "@trellis/spill": "workspace:*",
+    "@trellis/columnar": "workspace:*",
+    "@trellis/relational": "workspace:*",
+    "@trellis/storage": "workspace:*",
+    "@trellis/crdt": "workspace:*",
+    "@trellis/engine": "workspace:*"
+  },
+  "license": "MIT"
+}

@@ -167,6 +167,23 @@ export class TrellisEngine {
   }
 
   /**
+   * Evaluates an ephemeral formula string within the context of a sheet.
+   */
+  public evaluateFormula(sheetName: string, formulaText: string): CellValue {
+    const trimmed = formulaText.trim();
+    const formula = trimmed.startsWith("=") ? trimmed : `=${trimmed}`;
+    const ast = Parser.parse(formula);
+    const chunk = BytecodeCompiler.compile(ast);
+    const evalCtx = new WorkbookEvaluationContext(
+      this.workbook,
+      this.spillManager,
+      undefined,
+      sheetName
+    );
+    return VirtualMachine.evaluate(chunk, evalCtx);
+  }
+
+  /**
    * Registers a named range in the workbook.
    */
   public setNamedRange(name: string, rangeOrRef: string | RangeCoord): void {
