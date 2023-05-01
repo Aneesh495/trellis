@@ -32,6 +32,7 @@
     "packages/engine/src/**/*.ts",
     "packages/server/src/**/*.ts",
     "packages/client/src/**/*.ts",
+    "packages/cli/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
@@ -47,6 +48,7 @@
     "tests/engine.test.ts",
     "tests/server.test.ts",
     "tests/client.test.ts",
+    "tests/cli.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [

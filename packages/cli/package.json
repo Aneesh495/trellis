@@ -1,0 +1,30 @@
+{
+  "name": "@trellis/cli",
+  "version": "1.0.0",
+  "description": "Command-line interface, interactive terminal REPL, benchmark runner, and model auditor for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "trellis": "dist/bin.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*",
+    "@trellis/parser": "workspace:*",
+    "@trellis/runtime": "workspace:*",
+    "@trellis/functions": "workspace:*",
+    "@trellis/graph": "workspace:*",
+    "@trellis/spill": "workspace:*",
+    "@trellis/columnar": "workspace:*",
+    "@trellis/relational": "workspace:*",
+    "@trellis/storage": "workspace:*",
+    "@trellis/crdt": "workspace:*",
+    "@trellis/engine": "workspace:*",
+    "@trellis/server": "workspace:*"
+  },
+  "license": "MIT"
+}
