@@ -1,0 +1,16 @@
+{
+  "name": "@trellis/ffi",
+  "version": "1.0.0",
+  "description": "Foreign function interface and hardware SIMD acceleration bridge for Trellis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trellis/core": "workspace:*"
+  },
+  "license": "MIT"
+}

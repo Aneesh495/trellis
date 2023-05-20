@@ -15,7 +15,8 @@
       "@trellis/server": ["./packages/server/src/index.ts"],
       "@trellis/client": ["./packages/client/src/index.ts"],
       "@trellis/cli": ["./packages/cli/src/index.ts"],
-      "@trellis/engine": ["./packages/engine/src/index.ts"]
+      "@trellis/engine": ["./packages/engine/src/index.ts"],
+      "@trellis/ffi": ["./packages/ffi/src/index.ts"]
     }
   },
   "include": [
@@ -33,6 +34,7 @@
     "packages/server/src/**/*.ts",
     "packages/client/src/**/*.ts",
     "packages/cli/src/**/*.ts",
+    "packages/ffi/src/**/*.ts",
     "tests/framework.ts",
     "tests/runner.ts",
     "tests/core.test.ts",
@@ -49,6 +51,7 @@
     "tests/server.test.ts",
     "tests/client.test.ts",
     "tests/cli.test.ts",
+    "tests/ffi.test.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [
