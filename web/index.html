@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trellis - Tabular Calculation Studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app-root">
+    <!-- Top Header -->
+    <header id="top-bar">
+      <div class="brand">
+        <span class="brand-logo">T</span>
+        <span class="brand-title">Trellis Studio</span>
+        <span class="version-tag">v1.0.0</span>
+      </div>
+
+      <div class="model-meta">
+        <span id="model-name">Financial_Model.trellis</span>
+        <span id="save-status" class="status-clean">Saved</span>
+      </div>
+
+      <div class="header-actions">
+        <div id="peer-avatars" class="peer-list"></div>
+        <button id="btn-load-demo" class="btn btn-secondary">Load Model</button>
+        <button id="btn-export-csv" class="btn btn-secondary">Export CSV</button>
+        <button id="btn-export-json" class="btn btn-secondary">Export JSON</button>
+        <button id="btn-export-binary" class="btn btn-primary">Save .trellis</button>
+      </div>
+    </header>
+
+    <!-- Ribbon Toolbar -->
+    <nav id="ribbon">
+      <div class="ribbon-tabs">
+        <button class="ribbon-tab active" data-tab="home">Home</button>
+        <button class="ribbon-tab" data-tab="formulas">Formulas</button>
+        <button class="ribbon-tab" data-tab="data">Data</button>
+        <button class="ribbon-tab" data-tab="charts">Charts</button>
+      </div>
+
+      <div class="ribbon-panel active" id="panel-home">
+        <div class="tool-group">
+          <button id="btn-bold" class="tool-btn" title="Bold"><b>B</b></button>
+          <button id="btn-italic" class="tool-btn" title="Italic"><i>I</i></button>
+          <button id="btn-underline" class="tool-btn" title="Underline"><u>U</u></button>
+        </div>
+        <div class="divider"></div>
+        <div class="tool-group">
+          <button id="btn-align-left" class="tool-btn" title="Align Left">Left</button>
+          <button id="btn-align-center" class="tool-btn" title="Align Center">Center</button>
+          <button id="btn-align-right" class="tool-btn" title="Align Right">Right</button>
+        </div>
+        <div class="divider"></div>
+        <div class="tool-group">
+          <button id="btn-fmt-currency" class="tool-btn">$ Currency</button>
+          <button id="btn-fmt-percent" class="tool-btn">% Percent</button>
+          <button id="btn-fmt-decimal" class="tool-btn">.00 Decimals</button>
+        </div>
+      </div>
+
+      <div class="ribbon-panel" id="panel-formulas">
+        <div class="tool-group">
+          <button id="btn-insert-sum" class="tool-btn">AutoSUM</button>
+          <button id="btn-insert-average" class="tool-btn">Average</button>
+          <button id="btn-insert-xlookup" class="tool-btn">XLOOKUP</button>
+          <button id="btn-insert-sequence" class="tool-btn">SEQUENCE</button>
+        </div>
+        <div class="divider"></div>
+        <div class="tool-group">
+          <button id="btn-trace-precedents" class="tool-btn">Trace Precedents</button>
+          <button id="btn-trace-dependents" class="tool-btn">Trace Dependents</button>
+          <button id="btn-clear-trace" class="tool-btn">Clear Arrows</button>
+        </div>
+      </div>
+
+      <div class="ribbon-panel" id="panel-data">
+        <div class="tool-group">
+          <button id="btn-sort-asc" class="tool-btn">Sort A to Z</button>
+          <button id="btn-sort-desc" class="tool-btn">Sort Z to A</button>
+          <button id="btn-pivot-table" class="tool-btn">Create Pivot Table</button>
+        </div>
+      </div>
+
+      <div class="ribbon-panel" id="panel-charts">
+        <div class="tool-group">
+          <button id="btn-chart-bar" class="tool-btn">Column Chart</button>
+          <button id="btn-chart-line" class="tool-btn">Line Chart</button>
+          <button id="btn-toggle-chart" class="tool-btn">Toggle Chart Pane</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Formula Bar -->
+    <div id="formula-bar-container">
+      <div id="name-box">A1</div>
+      <div class="fx-label">fx</div>
+      <input type="text" id="formula-input" placeholder="Enter value or formula (e.g. =SUM(B1:B10))" spellcheck="false" autocomplete="off">
+    </div>
+
+    <!-- Main Workspace Container -->
+    <main id="workspace">
+      <!-- Virtualized Canvas Container -->
+      <div id="grid-canvas-wrapper">
+        <canvas id="grid-canvas"></canvas>
+      </div>
+
+      <!-- Side Chart & Analytics Drawer -->
+      <aside id="side-drawer" class="drawer-closed">
+        <div class="drawer-header">
+          <h3 id="drawer-title">Chart Visualizer</h3>
+          <button id="btn-close-drawer" class="btn-icon">&times;</button>
+        </div>
+        <div class="drawer-content">
+          <canvas id="chart-canvas" width="400" height="300"></canvas>
+          <div id="drawer-meta"></div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Sheet Tabs Strip -->
+    <footer id="footer-bar">
+      <div id="sheet-tabs-container">
+        <div id="sheet-tabs" class="tab-list">
+          <button class="sheet-tab active" data-sheet="Sheet1">Sheet1</button>
+        </div>
+        <button id="btn-add-sheet" class="btn-icon" title="Add Sheet">+</button>
+      </div>
+
+      <!-- Status Bar Stats -->
+      <div id="status-bar">
+        <span id="stat-cell">A1</span>
+        <span class="stat-sep">|</span>
+        <span id="stat-count">Count: 1</span>
+        <span class="stat-sep">|</span>
+        <span id="stat-sum">Sum: 0</span>
+        <span class="stat-sep">|</span>
+        <span id="stat-avg">Avg: 0</span>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
