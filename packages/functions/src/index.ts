@@ -11,6 +11,7 @@ import { registerTextFunctions } from "./text.js";
 import { registerDateTimeFunctions } from "./datetime.js";
 import { registerLookupFunctions } from "./lookup.js";
 import { registerArrayFunctions } from "./array.js";
+import { registerCombinatorFunctions } from "./combinators.js";
 import { registerInfoFunctions } from "./info.js";
 
 export * from "./registry.js";
@@ -22,6 +23,7 @@ export * from "./text.js";
 export * from "./datetime.js";
 export * from "./lookup.js";
 export * from "./array.js";
+export * from "./combinators.js";
 export * from "./info.js";
 
 /**
@@ -36,6 +38,7 @@ export function initializeStandardLibrary(reg: FunctionRegistry = FunctionRegist
   registerDateTimeFunctions(reg);
   registerLookupFunctions(reg);
   registerArrayFunctions(reg);
+  registerCombinatorFunctions(reg);
   registerInfoFunctions(reg);
   return reg;
 }

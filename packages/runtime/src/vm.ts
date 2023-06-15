@@ -407,3 +407,19 @@ export class VirtualMachine {
     return this.stack[this.stack.length - 1]!;
   }
 }
+
+/**
+ * Invokes a first-class LambdaClosure with the supplied arguments.
+ */
+export function invokeClosure(
+  closure: LambdaClosure,
+  args: CellValue[],
+  ctx: EvaluationContext
+): CellValue {
+  const callScope = closure.closureScope.child();
+  for (let i = 0; i < closure.params.length; i++) {
+    callScope.bind(closure.params[i]!, args[i] ?? null);
+  }
+  const chunk = BytecodeCompiler.compile(closure.body);
+  return VirtualMachine.evaluate(chunk, ctx, callScope);
+}
