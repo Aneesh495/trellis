@@ -259,18 +259,27 @@ export class TrellisEngine {
     // Detect cycles first
     const cyclicKeys = new Set<string>();
     const cycles = this.dag.detectCycles();
+    const isIterative = this.workbook.calculationOptions.iterative;
+
     if (cycles.length > 0) {
       for (const cycle of cycles) {
         for (const key of cycle.cyclePath) {
           cyclicKeys.add(key.toUpperCase());
-          const c = keyToCoord(key);
-          const err = TrellisError.refError("Circular dependency detected");
-          this.setCellError(c, err);
         }
-        this.events.emit("graph:cycle", {
-          cyclePath: cycle.cyclePath.map(keyToCoord),
-          error: TrellisError.refError("Circular dependency detected")
-        });
+      }
+
+      if (!isIterative) {
+        for (const cycle of cycles) {
+          for (const key of cycle.cyclePath) {
+            const c = keyToCoord(key);
+            const err = TrellisError.refError("Circular dependency detected");
+            this.setCellError(c, err);
+          }
+          this.events.emit("graph:cycle", {
+            cyclePath: cycle.cyclePath.map(keyToCoord),
+            error: TrellisError.refError("Circular dependency detected")
+          });
+        }
       }
     }
 
@@ -286,6 +295,57 @@ export class TrellisEngine {
         const coord = keyToCoord(cellKeyStr);
         if (this.evaluateCell(coord)) {
           evaluatedCount++;
+        }
+      }
+    }
+
+    // Resolve cyclic components using iterative relaxation if enabled
+    if (isIterative && cyclicKeys.size > 0) {
+      const cyclicKeysList = Array.from(cyclicKeys);
+      const maxIter = this.workbook.calculationOptions.maxIterations || 100;
+      const tol = this.workbook.calculationOptions.tolerance || 1e-6;
+      let converged = false;
+      let iter = 0;
+
+      while (iter < maxIter && !converged) {
+        iter++;
+        let maxDelta = 0;
+        for (const key of cyclicKeysList) {
+          const coord = keyToCoord(key);
+          const sheetName = coord.sheet || this.workbook.activeSheet.name;
+          const sheet = this.getOrCreateSheet(sheetName);
+          const cell = sheet.getCell(coord.row, coord.col);
+          const oldVal = cell ? cell.value : null;
+
+          if (this.evaluateCell(coord)) {
+            evaluatedCount++;
+          }
+
+          const newVal = cell ? cell.value : null;
+          const oldNum = typeof oldVal === "number" ? oldVal : 0;
+          const newNum = typeof newVal === "number" ? newVal : 0;
+          const delta = Math.abs(newNum - oldNum);
+          if (delta > maxDelta) {
+            maxDelta = delta;
+          }
+        }
+
+        if (maxDelta <= tol) {
+          converged = true;
+        }
+      }
+
+      // Propagate converged cyclic values to dependent downstream acyclic cells
+      const downstreamPlan = this.dag.planRecalculation(cyclicKeysList.map(keyToCoord));
+      for (const wave of downstreamPlan.waves) {
+        for (const cellKeyStr of wave) {
+          if (cyclicKeys.has(cellKeyStr.toUpperCase())) {
+            continue;
+          }
+          const coord = keyToCoord(cellKeyStr);
+          if (this.evaluateCell(coord)) {
+            evaluatedCount++;
+          }
         }
       }
     }
