@@ -212,20 +212,165 @@ export function registerDateTimeFunctions(reg: FunctionRegistry): void {
     }
   });
 
-  // YEARFRAC: Fraction of the year between two dates
+  // WORKDAY: Adds working days excluding weekends and holidays
+  reg.register({
+    name: "WORKDAY",
+    category: "datetime",
+    minArgs: 2,
+    maxArgs: 3,
+    description: "Calculates the date serial after a specified number of working days",
+    fn: (args) => {
+      let currentSerial = Math.trunc(coerceToNumber(args[0]!));
+      let daysRemaining = Math.trunc(coerceToNumber(args[1]!));
+      const holidays = new Set<number>();
+
+      if (args.length > 2 && args[2]) {
+        for (const h of toMatrix(args[2]).flatten()) {
+          if (typeof h === "number" || h instanceof Date) {
+            holidays.add(Math.trunc(coerceToNumber(h)));
+          }
+        }
+      }
+
+      const step = daysRemaining >= 0 ? 1 : -1;
+      let count = Math.abs(daysRemaining);
+
+      while (count > 0) {
+        currentSerial += step;
+        const d = serialToDate(currentSerial);
+        const dayOfWeek = d.getUTCDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6 && !holidays.has(currentSerial)) {
+          count--;
+        }
+      }
+
+      return currentSerial;
+    }
+  });
+
+  // DAYS360: Computes days between two dates based on a 360-day year
+  reg.register({
+    name: "DAYS360",
+    category: "datetime",
+    minArgs: 2,
+    maxArgs: 3,
+    description: "Calculates the number of days between two dates based on a 360-day year",
+    fn: (args) => {
+      const startSerial = Math.trunc(coerceToNumber(args[0]!));
+      const endSerial = Math.trunc(coerceToNumber(args[1]!));
+      const european = args.length > 2 ? Boolean(args[2]) : false;
+
+      const d1 = serialToDate(startSerial);
+      const d2 = serialToDate(endSerial);
+
+      let y1 = d1.getUTCFullYear();
+      let m1 = d1.getUTCMonth() + 1;
+      let day1 = d1.getUTCDate();
+
+      let y2 = d2.getUTCFullYear();
+      let m2 = d2.getUTCMonth() + 1;
+      let day2 = d2.getUTCDate();
+
+      if (european) {
+        if (day1 === 31) day1 = 30;
+        if (day2 === 31) day2 = 30;
+      } else {
+        if (day1 === 31) day1 = 30;
+        if (day2 === 31 && day1 >= 30) day2 = 30;
+      }
+
+      return (y2 - y1) * 360 + (m2 - m1) * 30 + (day2 - day1);
+    }
+  });
+
+  // ISOWEEKNUM: Returns the ISO 8601 week number of the year
+  reg.register({
+    name: "ISOWEEKNUM",
+    category: "datetime",
+    minArgs: 1,
+    maxArgs: 1,
+    description: "Returns the ISO 8601 week number of the year for a given date",
+    fn: (args) => {
+      const serial = Math.trunc(coerceToNumber(args[0]!));
+      const date = serialToDate(serial);
+      const target = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+      const dayNum = (target.getUTCDay() + 6) % 7;
+      target.setUTCDate(target.getUTCDate() - dayNum + 3);
+      const firstThursday = target.valueOf();
+      target.setUTCMonth(0, 1);
+      if (target.getUTCDay() !== 4) {
+        target.setUTCMonth(0, 1 + ((4 - target.getUTCDay() + 7) % 7));
+      }
+      return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+    }
+  });
+
+  // YEARFRAC: Financial day count fraction between two dates
   reg.register({
     name: "YEARFRAC",
     category: "datetime",
     minArgs: 2,
     maxArgs: 3,
-    description: "Calculates the fraction of the year represented by number of days between two dates",
+    description: "Calculates fraction of year represented by number of days between two dates",
     fn: (args) => {
       const startSerial = coerceToNumber(args[0]!);
       const endSerial = coerceToNumber(args[1]!);
-      const diff = Math.abs(endSerial - startSerial);
-      return diff / 365.25;
+      const basis = args.length > 2 ? Math.trunc(coerceToNumber(args[2]!)) : 0;
+
+      const minS = Math.min(startSerial, endSerial);
+      const maxS = Math.max(startSerial, endSerial);
+      const diffDays = maxS - minS;
+
+      switch (basis) {
+        case 1: {
+          // Actual/actual
+          const d1 = serialToDate(minS);
+          const d2 = serialToDate(maxS);
+          const y1 = d1.getUTCFullYear();
+          const y2 = d2.getUTCFullYear();
+          const avgDays = (y1 === y2) ? (isLeapYear(y1) ? 366 : 365) : 365.2425;
+          return diffDays / avgDays;
+        }
+        case 2:
+          // Actual/360
+          return diffDays / 360;
+        case 3:
+          // Actual/365
+          return diffDays / 365;
+        case 4: {
+          // European 30/360
+          const d1 = serialToDate(minS);
+          const d2 = serialToDate(maxS);
+          let day1 = d1.getUTCDate();
+          let day2 = d2.getUTCDate();
+          if (day1 === 31) day1 = 30;
+          if (day2 === 31) day2 = 30;
+          const days360 = (d2.getUTCFullYear() - d1.getUTCFullYear()) * 360 +
+            (d2.getUTCMonth() - d1.getUTCMonth()) * 30 +
+            (day2 - day1);
+          return days360 / 360;
+        }
+        case 0:
+        default: {
+          // US (NASD) 30/360
+          const d1 = serialToDate(minS);
+          const d2 = serialToDate(maxS);
+          let day1 = d1.getUTCDate();
+          let day2 = d2.getUTCDate();
+          if (day1 === 31) day1 = 30;
+          if (day2 === 31 && day1 >= 30) day2 = 30;
+          const days360 = (d2.getUTCFullYear() - d1.getUTCFullYear()) * 360 +
+            (d2.getUTCMonth() - d1.getUTCMonth()) * 30 +
+            (day2 - day1);
+          return days360 / 360;
+        }
+      }
     }
   });
+}
+
+function isLeapYear(year: number): boolean {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
 function toMatrix(val: CellValue): TMatrix {
