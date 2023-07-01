@@ -402,11 +402,195 @@ export function registerStatsFunctions(reg: FunctionRegistry): void {
       }
     }
   });
+
+  // NORM.INV: Inverse of the normal cumulative distribution
+  reg.register({
+    name: "NORM.INV",
+    category: "stats",
+    minArgs: 3,
+    maxArgs: 3,
+    description: "Calculates inverse of the normal cumulative distribution",
+    fn: (args) => {
+      const prob = coerceToNumber(args[0]!);
+      const mean = coerceToNumber(args[1]!);
+      const stdev = coerceToNumber(args[2]!);
+      if (prob <= 0 || prob >= 1 || stdev <= 0) throw TrellisError.numError();
+      return mean + normInvStandard(prob) * stdev;
+    }
+  });
+
+  // COVARIANCE.S: Sample Covariance
+  reg.register({
+    name: "COVARIANCE.S",
+    category: "stats",
+    minArgs: 2,
+    maxArgs: 2,
+    description: "Calculates sample covariance of two data series",
+    fn: (args) => {
+      const arr1 = toMatrix(args[0]!).flatten().map(coerceToNumber);
+      const arr2 = toMatrix(args[1]!).flatten().map(coerceToNumber);
+      if (arr1.length !== arr2.length || arr1.length < 2) throw TrellisError.numError();
+      const n = arr1.length;
+      let sum1 = 0;
+      let sum2 = 0;
+      for (let i = 0; i < n; i++) {
+        sum1 += arr1[i]!;
+        sum2 += arr2[i]!;
+      }
+      const mean1 = sum1 / n;
+      const mean2 = sum2 / n;
+      let cov = 0;
+      for (let i = 0; i < n; i++) {
+        cov += (arr1[i]! - mean1) * (arr2[i]! - mean2);
+      }
+      return cov / (n - 1);
+    }
+  });
+
+  // COVARIANCE.P: Population Covariance
+  reg.register({
+    name: "COVARIANCE.P",
+    category: "stats",
+    minArgs: 2,
+    maxArgs: 2,
+    description: "Calculates population covariance of two data series",
+    fn: (args) => {
+      const arr1 = toMatrix(args[0]!).flatten().map(coerceToNumber);
+      const arr2 = toMatrix(args[1]!).flatten().map(coerceToNumber);
+      if (arr1.length !== arr2.length || arr1.length === 0) throw TrellisError.numError();
+      const n = arr1.length;
+      let sum1 = 0;
+      let sum2 = 0;
+      for (let i = 0; i < n; i++) {
+        sum1 += arr1[i]!;
+        sum2 += arr2[i]!;
+      }
+      const mean1 = sum1 / n;
+      const mean2 = sum2 / n;
+      let cov = 0;
+      for (let i = 0; i < n; i++) {
+        cov += (arr1[i]! - mean1) * (arr2[i]! - mean2);
+      }
+      return cov / n;
+    }
+  });
+
+  // PERCENTILE.INC
+  reg.register({
+    name: "PERCENTILE.INC",
+    category: "stats",
+    minArgs: 2,
+    maxArgs: 2,
+    description: "Calculates the k-th percentile of values in a range",
+    fn: (args) => reg.call("PERCENTILE", args, null as any)
+  });
+
+  // QUARTILE.INC
+  reg.register({
+    name: "QUARTILE.INC",
+    category: "stats",
+    minArgs: 2,
+    maxArgs: 2,
+    description: "Calculates the quartile of a data set based on percentile values",
+    fn: (args) => {
+      const quart = Math.trunc(coerceToNumber(args[1]!));
+      if (quart < 0 || quart > 4) throw TrellisError.numError();
+      return reg.call("PERCENTILE", [args[0]!, quart * 0.25], null as any);
+    }
+  });
+
+  // MODE.SNGL: Most frequent value
+  reg.register({
+    name: "MODE.SNGL",
+    category: "stats",
+    minArgs: 1,
+    maxArgs: -1,
+    description: "Calculates the most frequently occurring value in a dataset",
+    fn: (args) => {
+      const nums = flattenNumericArgs(args);
+      if (nums.length === 0) throw TrellisError.naError();
+
+      const counts = new Map<number, number>();
+      let maxCount = 0;
+      for (const n of nums) {
+        const c = (counts.get(n) || 0) + 1;
+        counts.set(n, c);
+        if (c > maxCount) maxCount = c;
+      }
+
+      if (maxCount <= 1) throw TrellisError.naError();
+
+      for (const n of nums) {
+        if (counts.get(n) === maxCount) {
+          return n;
+        }
+      }
+      throw TrellisError.naError();
+    }
+  });
 }
 
 function toMatrix(val: CellValue): TMatrix {
   if (val instanceof TMatrix) return val;
   return TMatrix.scalar(val as PrimitiveValue);
+}
+
+/**
+ * Rational approximation of standard normal quantile function (Acklam's algorithm).
+ */
+function normInvStandard(p: number): number {
+  const a = [
+    -3.969683028665376e1,
+    2.209460984245205e2,
+    -2.759285104469687e2,
+    1.38357751867269e2,
+    -3.066479806614716e1,
+    2.506628277459239
+  ];
+  const b = [
+    -5.447609879822406e1,
+    1.615858368580409e2,
+    -1.556989798598866e2,
+    6.680131188771972e1,
+    -1.328068155288572e1
+  ];
+  const c = [
+    -7.784894002430293e-3,
+    -3.223964580411365e-1,
+    -2.400758277161838,
+    -2.549732539343734,
+    4.374664141464968,
+    2.938163982698783
+  ];
+  const d = [
+    7.784695709041462e-3,
+    3.224671290700398e-1,
+    2.445134137142996,
+    3.754408661907416
+  ];
+  const pLow = 0.02425;
+  const pHigh = 1 - pLow;
+
+  if (p < pLow) {
+    const q = Math.sqrt(-2 * Math.log(p));
+    return (
+      (((((c[0]! * q + c[1]!) * q + c[2]!) * q + c[3]!) * q + c[4]!) * q + c[5]!) /
+      ((((d[0]! * q + d[1]!) * q + d[2]!) * q + d[3]!) * q + 1)
+    );
+  }
+  if (p <= pHigh) {
+    const q = p - 0.5;
+    const r = q * q;
+    return (
+      ((((((a[0]! * r + a[1]!) * r + a[2]!) * r + a[3]!) * r + a[4]!) * r + a[5]!) * q) /
+      (((((b[0]! * r + b[1]!) * r + b[2]!) * r + b[3]!) * r + b[4]!) * r + 1)
+    );
+  }
+  const q = Math.sqrt(-2 * Math.log(1 - p));
+  return (
+    -(((((c[0]! * q + c[1]!) * q + c[2]!) * q + c[3]!) * q + c[4]!) * q + c[5]!) /
+    ((((d[0]! * q + d[1]!) * q + d[2]!) * q + d[3]!) * q + 1)
+  );
 }
 
 /**
