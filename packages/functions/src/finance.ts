@@ -289,6 +289,140 @@ export function registerFinanceFunctions(reg: FunctionRegistry): void {
       return (cost - salvage) / life;
     }
   });
+
+  // SYD: Sum-of-Years' Digits Depreciation
+  reg.register({
+    name: "SYD",
+    category: "finance",
+    minArgs: 4,
+    maxArgs: 4,
+    description: "Calculates sum-of-years digits depreciation of an asset",
+    fn: (args) => {
+      const cost = coerceToNumber(args[0]!);
+      const salvage = coerceToNumber(args[1]!);
+      const life = coerceToNumber(args[2]!);
+      const per = coerceToNumber(args[3]!);
+      if (cost < 0 || salvage < 0 || life <= 0 || per < 1 || per > life) {
+        throw TrellisError.numError();
+      }
+      return ((cost - salvage) * (life - per + 1) * 2) / (life * (life + 1));
+    }
+  });
+
+  // DB: Fixed-Declining Balance Depreciation
+  reg.register({
+    name: "DB",
+    category: "finance",
+    minArgs: 4,
+    maxArgs: 5,
+    description: "Calculates fixed-declining balance depreciation of an asset",
+    fn: (args) => {
+      const cost = coerceToNumber(args[0]!);
+      const salvage = coerceToNumber(args[1]!);
+      const life = Math.trunc(coerceToNumber(args[2]!));
+      const period = Math.trunc(coerceToNumber(args[3]!));
+      const month = args.length > 4 ? Math.trunc(coerceToNumber(args[4]!)) : 12;
+
+      if (cost <= 0 || salvage < 0 || life <= 0 || period < 1 || month < 1 || month > 12) {
+        throw TrellisError.numError();
+      }
+      if (period > life + (month === 12 ? 0 : 1)) {
+        throw TrellisError.numError();
+      }
+
+      // Fixed rate rounded to 3 decimal places
+      const rate = Math.round((1 - Math.pow(salvage / cost, 1 / life)) * 1000) / 1000;
+
+      let bookValue = cost;
+      let dep = 0;
+
+      // Period 1
+      const initialDep = cost * rate * (month / 12);
+      if (period === 1) return initialDep;
+
+      bookValue -= initialDep;
+
+      // Subsequent periods
+      for (let p = 2; p <= period; p++) {
+        if (p === life + 1) {
+          dep = (bookValue * rate * (12 - month)) / 12;
+        } else {
+          dep = bookValue * rate;
+        }
+        bookValue -= dep;
+      }
+
+      return dep;
+    }
+  });
+
+  // DDB: Double-Declining Balance Depreciation
+  reg.register({
+    name: "DDB",
+    category: "finance",
+    minArgs: 4,
+    maxArgs: 5,
+    description: "Calculates depreciation using double-declining balance or custom factor",
+    fn: (args) => {
+      const cost = coerceToNumber(args[0]!);
+      const salvage = coerceToNumber(args[1]!);
+      const life = coerceToNumber(args[2]!);
+      const period = coerceToNumber(args[3]!);
+      const factor = args.length > 4 ? coerceToNumber(args[4]!) : 2;
+
+      if (cost < 0 || salvage < 0 || life <= 0 || period < 1 || period > life || factor <= 0) {
+        throw TrellisError.numError();
+      }
+
+      let bookValue = cost;
+      let dep = 0;
+
+      for (let p = 1; p <= period; p++) {
+        const potentialDep = (bookValue * factor) / life;
+        dep = Math.min(potentialDep, Math.max(0, bookValue - salvage));
+        bookValue -= dep;
+      }
+
+      return dep;
+    }
+  });
+
+  // MIRR: Modified Internal Rate of Return
+  reg.register({
+    name: "MIRR",
+    category: "finance",
+    minArgs: 3,
+    maxArgs: 3,
+    description: "Calculates Modified Internal Rate of Return for periodic cash flows",
+    fn: (args) => {
+      const flows = toMatrix(args[0]!).flatten().map(coerceToNumber);
+      const financeRate = coerceToNumber(args[1]!);
+      const reinvestRate = coerceToNumber(args[2]!);
+
+      const n = flows.length;
+      if (n < 2) throw TrellisError.numError();
+
+      let npvPos = 0;
+      let npvNeg = 0;
+      let hasPos = false;
+      let hasNeg = false;
+
+      for (let t = 0; t < n; t++) {
+        const cf = flows[t]!;
+        if (cf > 0) {
+          npvPos += cf * Math.pow(1 + reinvestRate, n - 1 - t);
+          hasPos = true;
+        } else if (cf < 0) {
+          npvNeg += cf / Math.pow(1 + financeRate, t);
+          hasNeg = true;
+        }
+      }
+
+      if (!hasPos || !hasNeg || npvNeg === 0) throw TrellisError.numError();
+
+      return Math.pow(-npvPos / npvNeg, 1 / (n - 1)) - 1;
+    }
+  });
 }
 
 function toMatrix(val: CellValue): TMatrix {
