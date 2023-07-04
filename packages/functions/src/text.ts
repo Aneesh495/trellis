@@ -3,7 +3,7 @@
  */
 
 import { FunctionRegistry, flattenAllArgs } from "./registry.js";
-import { TMatrix, TrellisError, coerceToString, coerceToNumber } from "@trellis/core";
+import { TMatrix, TrellisError, coerceToString, coerceToNumber, PrimitiveValue } from "@trellis/core";
 
 export function registerTextFunctions(reg: FunctionRegistry): void {
   // CONCAT
@@ -366,6 +366,178 @@ export function registerTextFunctions(reg: FunctionRegistry): void {
       const text = coerceToString(args[0]!);
       if (text.length === 0) throw TrellisError.valueError();
       return text.charCodeAt(0);
+    }
+  });
+
+  // TEXTSPLIT: Splits text into rows and columns using delimiters
+  reg.register({
+    name: "TEXTSPLIT",
+    category: "text",
+    minArgs: 2,
+    maxArgs: 3,
+    description: "Splits text strings by using column and row delimiters",
+    fn: (args) => {
+      const text = coerceToString(args[0]!);
+      const colDelim = args[1] !== null && args[1] !== undefined ? coerceToString(args[1]) : "";
+      const rowDelim = args.length > 2 && args[2] !== null && args[2] !== undefined ? coerceToString(args[2]) : "";
+
+      if (rowDelim.length > 0) {
+        const rawRows = text.split(rowDelim);
+        const matrixData: PrimitiveValue[][] = [];
+        let maxCols = 0;
+
+        for (const r of rawRows) {
+          const cols = colDelim.length > 0 ? r.split(colDelim) : [r];
+          matrixData.push(cols);
+          if (cols.length > maxCols) maxCols = cols.length;
+        }
+
+        // Pad uneven rows
+        for (const row of matrixData) {
+          while (row.length < maxCols) {
+            row.push("");
+          }
+        }
+
+        return new TMatrix(matrixData);
+      }
+
+      if (colDelim.length > 0) {
+        const cols = text.split(colDelim);
+        return TMatrix.rowVector(cols);
+      }
+
+      return TMatrix.scalar(text);
+    }
+  });
+
+  // TEXTBEFORE: Returns text that occurs before a given delimiter
+  reg.register({
+    name: "TEXTBEFORE",
+    category: "text",
+    minArgs: 2,
+    maxArgs: 3,
+    description: "Returns text that occurs before a given delimiter",
+    fn: (args) => {
+      const text = coerceToString(args[0]!);
+      const delim = coerceToString(args[1]!);
+      const instance = args.length > 2 ? Math.trunc(coerceToNumber(args[2]!)) : 1;
+
+      if (delim.length === 0) throw TrellisError.valueError();
+      const indices: number[] = [];
+      let pos = 0;
+
+      while ((pos = text.indexOf(delim, pos)) !== -1) {
+        indices.push(pos);
+        pos += delim.length;
+      }
+
+      if (indices.length === 0) throw TrellisError.naError();
+
+      let targetIdx: number;
+      if (instance > 0) {
+        if (instance > indices.length) throw TrellisError.naError();
+        targetIdx = indices[instance - 1]!;
+      } else if (instance < 0) {
+        const revIdx = indices.length + instance;
+        if (revIdx < 0) throw TrellisError.naError();
+        targetIdx = indices[revIdx]!;
+      } else {
+        throw TrellisError.valueError();
+      }
+
+      return text.substring(0, targetIdx);
+    }
+  });
+
+  // TEXTAFTER: Returns text that occurs after a given delimiter
+  reg.register({
+    name: "TEXTAFTER",
+    category: "text",
+    minArgs: 2,
+    maxArgs: 3,
+    description: "Returns text that occurs after a given delimiter",
+    fn: (args) => {
+      const text = coerceToString(args[0]!);
+      const delim = coerceToString(args[1]!);
+      const instance = args.length > 2 ? Math.trunc(coerceToNumber(args[2]!)) : 1;
+
+      if (delim.length === 0) throw TrellisError.valueError();
+      const indices: number[] = [];
+      let pos = 0;
+
+      while ((pos = text.indexOf(delim, pos)) !== -1) {
+        indices.push(pos);
+        pos += delim.length;
+      }
+
+      if (indices.length === 0) throw TrellisError.naError();
+
+      let targetIdx: number;
+      if (instance > 0) {
+        if (instance > indices.length) throw TrellisError.naError();
+        targetIdx = indices[instance - 1]!;
+      } else if (instance < 0) {
+        const revIdx = indices.length + instance;
+        if (revIdx < 0) throw TrellisError.naError();
+        targetIdx = indices[revIdx]!;
+      } else {
+        throw TrellisError.valueError();
+      }
+
+      return text.substring(targetIdx + delim.length);
+    }
+  });
+
+  // VALUETOTEXT: Formats value to text
+  reg.register({
+    name: "VALUETOTEXT",
+    category: "text",
+    minArgs: 1,
+    maxArgs: 2,
+    description: "Returns text from any value formatted as concise or strict",
+    fn: (args) => {
+      const val = args[0]!;
+      const strict = args.length > 1 ? coerceToNumber(args[1]!) === 1 : false;
+
+      if (val === null || val === undefined) return "";
+      if (typeof val === "string") {
+        return strict ? `"${val}"` : val;
+      }
+      return coerceToString(val);
+    }
+  });
+
+  // ARRAYTOTEXT: Formats array into text representation
+  reg.register({
+    name: "ARRAYTOTEXT",
+    category: "text",
+    minArgs: 1,
+    maxArgs: 2,
+    description: "Returns a text representation of any array of values",
+    fn: (args) => {
+      const val = args[0]!;
+      const strict = args.length > 1 ? coerceToNumber(args[1]!) === 1 : false;
+      const matrix = val instanceof TMatrix ? val : TMatrix.scalar(val as PrimitiveValue);
+
+      const rows: string[] = [];
+      for (let r = 0; r < matrix.rowCount; r++) {
+        const cols: string[] = [];
+        for (let c = 0; c < matrix.colCount; c++) {
+          const item = matrix.get(r, c);
+          if (strict && typeof item === "string") {
+            cols.push(`"${item}"`);
+          } else {
+            cols.push(item === null ? "" : coerceToString(item));
+          }
+        }
+        rows.push(cols.join(strict ? ", " : ", "));
+      }
+
+      if (strict) {
+        return "{" + rows.join("; ") + "}";
+      }
+      return rows.join(", ");
     }
   });
 }
