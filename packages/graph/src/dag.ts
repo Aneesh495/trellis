@@ -32,6 +32,10 @@ export class DependencyDAG {
     return this.nodes.get(key.toUpperCase());
   }
 
+  public getAllNodes(): ReadonlyMap<string, DependencyNode> {
+    return this.nodes;
+  }
+
   /**
    * Configures precedents and range dependencies for a consumer cell node.
    */
