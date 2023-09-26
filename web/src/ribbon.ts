@@ -83,6 +83,10 @@ export class RibbonController {
       applyFormat((fmt) => { fmt.numberFormat = "0.0%"; });
     });
 
+    document.getElementById("btn-fmt-decimal")?.addEventListener("click", () => {
+      applyFormat((fmt) => { fmt.numberFormat = "0.00"; });
+    });
+
     // 3. Formula Insertions
     document.getElementById("btn-insert-sum")?.addEventListener("click", () => {
       const range = selection.primaryRange;

@@ -18,7 +18,7 @@
 
       <div class="model-meta">
         <span id="model-name">Financial_Model.trellis</span>
-        <span id="save-status" class="status-clean">Saved</span>
+        <span id="save-status" class="status-clean" role="status">Local session</span>
       </div>
 
       <div class="header-actions">
@@ -95,14 +95,14 @@
     <div id="formula-bar-container">
       <div id="name-box">A1</div>
       <div class="fx-label">fx</div>
-      <input type="text" id="formula-input" placeholder="Enter value or formula (e.g. =SUM(B1:B10))" spellcheck="false" autocomplete="off">
+      <input type="text" id="formula-input" aria-label="Cell value or formula" placeholder="Enter value or formula (e.g. =SUM(B1:B10))" spellcheck="false" autocomplete="off">
     </div>
 
     <!-- Main Workspace Container -->
     <main id="workspace">
       <!-- Virtualized Canvas Container -->
       <div id="grid-canvas-wrapper">
-        <canvas id="grid-canvas"></canvas>
+        <canvas id="grid-canvas" tabindex="0" aria-label="Workbook grid. Use arrows to select cells."></canvas>
       </div>
 
       <!-- Side Chart & Analytics Drawer -->

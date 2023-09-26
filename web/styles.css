@@ -367,3 +367,12 @@ body, html {
 .stat-sep {
   color: var(--border-dark);
 }
+
+#grid-canvas:focus-visible { outline: 2px solid var(--accent-color); outline-offset: -2px; }
+@media (max-width: 700px) {
+  #top-bar { flex-wrap: wrap; height: auto; padding: .5rem; gap: .4rem; }
+  .header-actions { flex-wrap: wrap; }
+  .ribbon-panel.active { overflow-x: auto; min-height: 44px; }
+  .tool-group { flex: 0 0 auto; }
+  #side-drawer { position: absolute; right: 0; width: min(100%, 420px); z-index: 2; }
+}

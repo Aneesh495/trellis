@@ -2,6 +2,7 @@
  * Trellis Web Studio Single-Page Application Entrypoint.
  */
 
+import { BinaryCodec, CsvCodec, JsonCodec } from "@trellis/storage";
 import { formatCellRef } from "@trellis/core";
 import { TrellisEngine } from "@trellis/engine";
 import {
@@ -167,6 +168,7 @@ export class TrellisStudioApp {
     if (!this.canvas) return;
 
     this.canvas.addEventListener("mousedown", (e) => {
+      this.canvas?.focus({ preventScroll: true });
       this.isMouseDown = true;
       const rect = this.canvas!.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -207,9 +209,7 @@ export class TrellisStudioApp {
   }
 
   private setupKeyboardEvents(): void {
-    window.addEventListener("keydown", (e) => {
-      const activeEl = document.activeElement;
-      if (activeEl && activeEl.tagName === "INPUT") return;
+    this.canvas?.addEventListener("keydown", (e) => {
 
       const cursor = this.selection.cursor;
 
@@ -258,6 +258,8 @@ export class TrellisStudioApp {
         e.preventDefault();
         const cursor = this.selection.cursor;
         this.engine.setCell(this.activeSheetName, cursor, formulaInput.value);
+        document.getElementById("save-status")!.textContent = "Local edits";
+        if (!document.getElementById("side-drawer")?.classList.contains("drawer-closed")) this.updateChartPreview();
         formulaInput.blur();
         this.render();
       } else if (e.key === "Escape") {
@@ -285,10 +287,30 @@ export class TrellisStudioApp {
   }
 
   private setupExportButtons(): void {
+    const download = (name: string, blob: Blob) => {
+      const href = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = href;
+      link.download = name;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(href), 1000);
+      document.getElementById("save-status")!.textContent = `Downloaded ${name}`;
+    };
+
     document.getElementById("btn-export-csv")?.addEventListener("click", () => {
-      const csv = this.engine.workbook.getSheet(this.activeSheetName)?.getAllCells();
-      if (!csv) return;
-      alert(`Exported CSV for sheet: ${this.activeSheetName}`);
+      const sheet = this.engine.workbook.getSheet(this.activeSheetName);
+      if (!sheet) return;
+      download(`${sheet.name}.csv`, new Blob([CsvCodec.serialize(sheet)], { type: "text/csv;charset=utf-8" }));
+    });
+    document.getElementById("btn-export-json")?.addEventListener("click", () => {
+      const json = JsonCodec.serialize(this.engine.workbook, true);
+      download("workbook.json", new Blob([json], { type: "application/json" }));
+    });
+    document.getElementById("btn-export-binary")?.addEventListener("click", () => {
+      const bytes = Uint8Array.from(BinaryCodec.serialize(this.engine.workbook));
+      download("workbook.trellis", new Blob([bytes], { type: "application/octet-stream" }));
     });
 
     document.getElementById("btn-load-demo")?.addEventListener("click", () => {
@@ -313,7 +335,10 @@ export class TrellisStudioApp {
         {
           name: "Revenue",
           color: "#2563EB",
-          data: [100.0, 115.0, 132.25, 152.09, 174.9]
+          data: [1, 2, 3, 4, 5].map(col => {
+            const value = this.engine.getCellValue("Model", { row: 6, col });
+            return typeof value === "number" ? value : 0;
+          })
         }
       ]
     });
