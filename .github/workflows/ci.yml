@@ -1,0 +1,50 @@
+name: Trellis CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Node Dependencies
+        run: npm ci || npm install
+
+      - name: Zero-Defect Em Dash and En Dash Audit
+        run: npm run audit:emdash
+
+      - name: TypeScript Static Typecheck
+        run: npm run typecheck
+
+      - name: Run Full TypeScript Test Harness (160+ Tests)
+        run: npm test
+
+      - name: Compile and Run C SIMD Kernel Tests
+        run: |
+          cd c
+          make clean
+          make test
+
+      - name: Run Python SDK Test Suite
+        run: |
+          cd python
+          python3 -m unittest discover -s tests
+
+      - name: Execute Subsystem Microbenchmarks
+        run: npm run bench
